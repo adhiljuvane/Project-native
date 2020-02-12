@@ -37,6 +37,10 @@ target 'AwesomeProject' do
 
   pod 'TextToSpeech', :path => '../node_modules/react-native-tts'
 
+  pod 'react-native-dialogflow', :path => '../node_modules/react-native-dialogflow'
+
+  pod 'react-native-voice', :path => '../node_modules/react-native-voice'
+
   target 'AwesomeProjectTests' do
     inherit! :search_paths
     # Pods for testing
