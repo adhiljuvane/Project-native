@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
 import com.wenkesj.voice.VoicePackage;
 import de.innfactory.apiai.RNApiAiPackage;
 import net.no_mad.tts.TextToSpeechPackage;

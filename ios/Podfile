@@ -41,6 +41,8 @@ target 'AwesomeProject' do
 
   pod 'react-native-voice', :path => '../node_modules/react-native-voice'
 
+  pod 'react-native-safe-area-context', :path => '../node_modules/react-native-safe-area-context'
+
   target 'AwesomeProjectTests' do
     inherit! :search_paths
     # Pods for testing

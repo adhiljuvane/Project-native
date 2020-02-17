@@ -11,6 +11,13 @@ export default class Home extends React.Component {
       Dialogflow.LANG_ENGLISH_US,
     );
   }
+
+  gotSpeech = data => {
+    if (data === 'Open camera.') {
+      this.props.navigation.navigate('Camera');
+    }
+  };
+
   render() {
     return (
       <View>
@@ -20,6 +27,7 @@ export default class Home extends React.Component {
             Dialogflow.startListening(
               res => {
                 console.log(res.result.resolvedQuery);
+                this.gotSpeech(res.result.resolvedQuery);
               },
               error => {
                 console.log(error);
