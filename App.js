@@ -2,6 +2,7 @@ import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import Camera from './components/Camera.js';
 import Home from './components/Home';
+import TextReader from './components/TextReader';
 import {createSwitchNavigator, createAppContainer} from 'react-navigation';
 
 export default class App extends React.Component {
@@ -22,6 +23,7 @@ export default class App extends React.Component {
 const MainStack = createSwitchNavigator({
   Home: Home,
   Camera: Camera,
+  TextReader: TextReader,
 });
 
 const AppContainer = createAppContainer(MainStack);
