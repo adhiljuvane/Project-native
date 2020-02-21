@@ -32,7 +32,16 @@ const MajorStack = createStackNavigator({
   Home: {
     screen: Home,
     navigationOptions: {
-      headerTitle: 'Home',
+      headerTitle: 'Vis-Aid',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 24,
+        color: '#191716',
+      },
+      headerStyle: {
+        height: 80,
+        backgroundColor: '#e6af2e',
+      },
     },
   },
   Camera: {
