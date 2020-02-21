@@ -12,6 +12,12 @@ import Dialogflow from 'react-native-dialogflow';
 import Tts from 'react-native-tts';
 
 export default class Home extends React.Component {
+  static defaultNavigationOptions = {
+    title: 'Chat',
+    headerStyle: {backgroundColor: 'red'},
+    headerTitleStyle: {color: 'green'},
+  };
+
   constructor(props) {
     super(props);
 
@@ -36,7 +42,7 @@ export default class Home extends React.Component {
 
   render() {
     return (
-      <View>
+      <View style={styles.container}>
         <TouchableOpacity
           onPress={() => {
             Dialogflow.startListening(
@@ -58,3 +64,12 @@ export default class Home extends React.Component {
     );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#e3e3e3',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

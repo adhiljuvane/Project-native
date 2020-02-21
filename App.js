@@ -4,6 +4,7 @@ import Camera from './components/Camera.js';
 import Home from './components/Home';
 import TextReader from './components/TextReader';
 import {createSwitchNavigator, createAppContainer} from 'react-navigation';
+import {createStackNavigator} from 'react-navigation-stack';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -12,21 +13,43 @@ export default class App extends React.Component {
   }
 
   render() {
-    return (
-      <View style={styles.container}>
-        <AppContainer />
-      </View>
-    );
+    return <AppContainer style={styles.container} />;
   }
 }
 
-const MainStack = createSwitchNavigator({
-  Home: Home,
-  Camera: Camera,
-  TextReader: TextReader,
+// const MainStack = createSwitchNavigator({
+//   Home: {
+//     screen: Home,
+//     navigationOptions: {
+//       headerTitle: 'Home',
+//     },
+//   },
+//   Camera: Camera,
+//   TextReader: TextReader,
+// });
+
+const MajorStack = createStackNavigator({
+  Home: {
+    screen: Home,
+    navigationOptions: {
+      headerTitle: 'Home',
+    },
+  },
+  Camera: {
+    screen: Camera,
+    navigationOptions: {
+      headerTitle: 'Camera',
+    },
+  },
+  TextReader: {
+    screen: TextReader,
+    navigationOptions: {
+      headerTitle: 'Text Reader',
+    },
+  },
 });
 
-const AppContainer = createAppContainer(MainStack);
+const AppContainer = createAppContainer(MajorStack);
 
 const styles = StyleSheet.create({
   container: {
