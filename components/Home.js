@@ -1,6 +1,15 @@
+/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {Text, Button, View, Alert} from 'react-native';
+import {
+  Text,
+  View,
+  Alert,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+} from 'react-native';
 import Dialogflow from 'react-native-dialogflow';
+import Tts from 'react-native-tts';
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -12,11 +21,15 @@ export default class Home extends React.Component {
     );
   }
 
+  componentDidMount() {
+    Tts.speak('Welcome to Vis-Aid. What do you want?');
+  }
+
   gotSpeech = data => {
-    if (data === 'Open camera.') {
+    if (data === 'open camera') {
       this.props.navigation.navigate('Camera');
     }
-    if (data === 'Open text reader.') {
+    if (data === 'open text reader') {
       this.props.navigation.navigate('TextReader');
     }
   };
@@ -24,8 +37,7 @@ export default class Home extends React.Component {
   render() {
     return (
       <View>
-        <Button
-          title="Press Me"
+        <TouchableOpacity
           onPress={() => {
             Dialogflow.startListening(
               res => {
@@ -36,8 +48,12 @@ export default class Home extends React.Component {
                 console.log(error);
               },
             );
-          }}
-        />
+          }}>
+          <Image
+            source={require('../assets/brand.png')}
+            style={{width: 100, height: 100}}
+          />
+        </TouchableOpacity>
       </View>
     );
   }
