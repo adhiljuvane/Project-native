@@ -39,7 +39,7 @@ const MajorStack = createStackNavigator({
         color: '#191716',
       },
       headerStyle: {
-        height: 80,
+        height: 70,
         backgroundColor: '#e6af2e',
       },
     },
@@ -47,13 +47,31 @@ const MajorStack = createStackNavigator({
   Camera: {
     screen: Camera,
     navigationOptions: {
-      headerTitle: 'Camera',
+      headerTitle: 'Vis-Aid',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 24,
+        color: '#191716',
+      },
+      headerStyle: {
+        height: 70,
+        backgroundColor: '#e6af2e',
+      },
     },
   },
   TextReader: {
     screen: TextReader,
     navigationOptions: {
-      headerTitle: 'Text Reader',
+      headerTitle: 'Vis-Aid',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 24,
+        color: '#191716',
+      },
+      headerStyle: {
+        height: 70,
+        backgroundColor: '#e6af2e',
+      },
     },
   },
 });
