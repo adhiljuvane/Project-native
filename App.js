@@ -3,6 +3,7 @@ import {StyleSheet, View} from 'react-native';
 import Camera from './components/Camera.js';
 import Home from './components/Home';
 import TextReader from './components/TextReader';
+import CameraScreen from './components/RNCamera';
 import {createSwitchNavigator, createAppContainer} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
 
@@ -13,7 +14,8 @@ export default class App extends React.Component {
   }
 
   render() {
-    return <AppContainer style={styles.container} />;
+    // return <AppContainer style={styles.container} />;
+    return <CameraScreen />;
   }
 }
 
