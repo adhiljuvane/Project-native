@@ -5,29 +5,18 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Slider,
   Image,
-  TouchableWithoutFeedback,
   Dimensions,
-  Alert,
 } from 'react-native';
 import {RNCamera} from 'react-native-camera';
 import Tts from 'react-native-tts';
+import Dialogflow from 'react-native-dialogflow';
 
 const flashModeOrder = {
   off: 'on',
   on: 'auto',
   auto: 'torch',
   torch: 'off',
-};
-
-const wbOrder = {
-  auto: 'sunny',
-  sunny: 'cloudy',
-  cloudy: 'shadow',
-  shadow: 'fluorescent',
-  fluorescent: 'incandescent',
-  incandescent: 'auto',
 };
 
 const landmarkSize = 2;
@@ -53,14 +42,38 @@ export default class CameraScreen extends React.Component {
       maxDuration: 5,
       quality: RNCamera.Constants.VideoQuality['288p'],
     },
-    isRecording: false,
-    canDetectFaces: false,
-    canDetectText: false,
-    canDetectBarcode: false,
+    canDetectText: true,
     faces: [],
     textBlocks: [],
-    barcodes: [],
   };
+
+  gotSpeech = data => {
+    if (data === 'open camera') {
+      this.props.navigation.navigate('Camera');
+    }
+    if (data === 'open text reader') {
+      this.props.navigation.navigate('TextReader');
+    }
+  };
+
+  constructor() {
+    super();
+    Dialogflow.setConfiguration(
+      'f39404ed1be04ba5add1b40b7c6e0ae8',
+      Dialogflow.LANG_ENGLISH_US,
+    );
+  }
+  componentDidMount() {
+    Dialogflow.startListening(
+      res => {
+        console.log(res.result.resolvedQuery);
+        this.gotSpeech(res.result.resolvedQuery);
+      },
+      error => {
+        console.log(error);
+      },
+    );
+  }
 
   toggleFacing() {
     this.setState({
@@ -74,156 +87,23 @@ export default class CameraScreen extends React.Component {
     });
   }
 
-  // toggleWB() {
-  //   this.setState({
-  //     whiteBalance: wbOrder[this.state.whiteBalance],
-  //   });
-  // }
-
-  toggleFocus() {
-    this.setState({
-      autoFocus: this.state.autoFocus === 'on' ? 'off' : 'on',
-    });
-  }
-
-  touchToFocus(event) {
-    const {pageX, pageY} = event.nativeEvent;
-    const screenWidth = Dimensions.get('window').width;
-    const screenHeight = Dimensions.get('window').height;
-    const isPortrait = screenHeight > screenWidth;
-
-    let x = pageX / screenWidth;
-    let y = pageY / screenHeight;
-    // Coordinate transform for portrait. See autoFocusPointOfInterest in docs for more info
-    if (isPortrait) {
-      x = pageY / screenHeight;
-      y = -(pageX / screenWidth) + 1;
-    }
-
-    this.setState({
-      autoFocusPoint: {
-        normalized: {x, y},
-        drawRectPosition: {x: pageX, y: pageY},
-      },
-    });
-  }
-
-  zoomOut() {
-    this.setState({
-      zoom: this.state.zoom - 0.1 < 0 ? 0 : this.state.zoom - 0.1,
-    });
-  }
-
-  zoomIn() {
-    this.setState({
-      zoom: this.state.zoom + 0.1 > 1 ? 1 : this.state.zoom + 0.1,
-    });
-  }
-
-  setFocusDepth(depth) {
-    this.setState({
-      depth,
-    });
-  }
-
   takePicture = async function() {
     if (this.camera) {
-      const data = await this.camera.takePictureAsync();
+      // const data = await this.camera.takePictureAsync();
       if (this.state.canDetectText) {
         let text = '';
         this.state.textBlocks.forEach(item => {
           text = text + ' ' + item.value;
         });
-        Tts.speak('The In the image you just took is ' + text);
-      }
-    }
-  };
-
-  takeVideo = async function() {
-    if (this.camera) {
-      try {
-        const promise = this.camera.recordAsync(this.state.recordOptions);
-
-        if (promise) {
-          this.setState({isRecording: true});
-          const data = await promise;
-          this.setState({isRecording: false});
-          console.warn('takeVideo', data);
-        }
-      } catch (e) {
-        console.error(e);
+        text !== ''
+          ? Tts.speak('The text in the image you just took is ' + text)
+          : Tts.speak('There is no text in the image you just took');
       }
     }
   };
 
   toggle = value => () =>
     this.setState(prevState => ({[value]: !prevState[value]}));
-
-  facesDetected = ({faces}) => this.setState({faces});
-
-  renderFace = ({bounds, faceID, rollAngle, yawAngle}) => (
-    <View
-      key={faceID}
-      transform={[
-        {perspective: 600},
-        {rotateZ: `${rollAngle.toFixed(0)}deg`},
-        {rotateY: `${yawAngle.toFixed(0)}deg`},
-      ]}
-      style={[
-        styles.face,
-        {
-          ...bounds.size,
-          left: bounds.origin.x,
-          top: bounds.origin.y,
-        },
-      ]}>
-      <Text style={styles.faceText}>ID: {faceID}</Text>
-      <Text style={styles.faceText}>rollAngle: {rollAngle.toFixed(0)}</Text>
-      <Text style={styles.faceText}>yawAngle: {yawAngle.toFixed(0)}</Text>
-    </View>
-  );
-
-  renderLandmarksOfFace(face) {
-    const renderLandmark = position =>
-      position && (
-        <View
-          style={[
-            styles.landmark,
-            {
-              left: position.x - landmarkSize / 2,
-              top: position.y - landmarkSize / 2,
-            },
-          ]}
-        />
-      );
-    return (
-      <View key={`landmarks-${face.faceID}`}>
-        {renderLandmark(face.leftEyePosition)}
-        {renderLandmark(face.rightEyePosition)}
-        {renderLandmark(face.leftEarPosition)}
-        {renderLandmark(face.rightEarPosition)}
-        {renderLandmark(face.leftCheekPosition)}
-        {renderLandmark(face.rightCheekPosition)}
-        {renderLandmark(face.leftMouthPosition)}
-        {renderLandmark(face.mouthPosition)}
-        {renderLandmark(face.rightMouthPosition)}
-        {renderLandmark(face.noseBasePosition)}
-        {renderLandmark(face.bottomMouthPosition)}
-      </View>
-    );
-  }
-
-  renderFaces = () => (
-    <View style={styles.facesContainer} pointerEvents="none">
-      {this.state.faces.map(this.renderFace)}
-    </View>
-  );
-
-  renderLandmarks = () => (
-    <View style={styles.facesContainer} pointerEvents="none">
-      {this.state.faces.map(this.renderLandmarksOfFace)}
-    </View>
-  );
 
   renderTextBlocks = () => (
     <View style={styles.facesContainer} pointerEvents="none">
@@ -258,37 +138,8 @@ export default class CameraScreen extends React.Component {
     this.setState({textBlocks});
   };
 
-  barcodeRecognized = ({barcodes}) => this.setState({barcodes});
-
-  renderBarcodes = () => (
-    <View style={styles.facesContainer} pointerEvents="none">
-      {this.state.barcodes.map(this.renderBarcode)}
-    </View>
-  );
-
-  renderBarcode = ({bounds, data, type}) => (
-    <React.Fragment key={data + bounds.origin.x}>
-      <View
-        style={[
-          styles.text,
-          {
-            ...bounds.size,
-            left: bounds.origin.x,
-            top: bounds.origin.y,
-          },
-        ]}>
-        <Text style={[styles.textBlock]}>{`${data} ${type}`}</Text>
-      </View>
-    </React.Fragment>
-  );
-
   renderCamera() {
-    const {canDetectFaces, canDetectText, canDetectBarcode} = this.state;
-
-    const drawFocusRingPosition = {
-      top: this.state.autoFocusPoint.drawRectPosition.y - 32,
-      left: this.state.autoFocusPoint.drawRectPosition.x - 32,
-    };
+    const {canDetectText} = this.state;
     return (
       <RNCamera
         ref={ref => {
@@ -301,7 +152,7 @@ export default class CameraScreen extends React.Component {
         type={this.state.type}
         flashMode={this.state.flash}
         autoFocus={this.state.autoFocus}
-        autoFocusPointOfInterest={this.state.autoFocusPoint.normalized}
+        // autoFocusPointOfInterest={this.state.autoFocusPoint.normalized}
         zoom={this.state.zoom}
         whiteBalance={this.state.whiteBalance}
         ratio={this.state.ratio}
@@ -312,22 +163,7 @@ export default class CameraScreen extends React.Component {
           buttonPositive: 'Ok',
           buttonNegative: 'Cancel',
         }}
-        faceDetectionLandmarks={
-          RNCamera.Constants.FaceDetection.Landmarks
-            ? RNCamera.Constants.FaceDetection.Landmarks.all
-            : undefined
-        }
-        onFacesDetected={canDetectFaces ? this.facesDetected : null}
-        onTextRecognized={canDetectText ? this.textRecognized : null}
-        onGoogleVisionBarcodesDetected={
-          canDetectBarcode ? this.barcodeRecognized : null
-        }>
-        <View style={StyleSheet.absoluteFill}>
-          <View style={[styles.autoFocusBox, drawFocusRingPosition]} />
-          <TouchableWithoutFeedback onPress={this.touchToFocus.bind(this)}>
-            <View style={{flex: 1}} />
-          </TouchableWithoutFeedback>
-        </View>
+        onTextRecognized={canDetectText ? this.textRecognized : null}>
         <View
           style={{
             flex: 0.6,
@@ -353,14 +189,6 @@ export default class CameraScreen extends React.Component {
               onPress={this.toggleFlash.bind(this)}>
               <Image source={require('../assets/flash.png')} />
             </TouchableOpacity>
-            {/* <TouchableOpacity
-              style={styles.flipButton}
-              onPress={this.toggleWB.bind(this)}>
-              <Text style={styles.flipText}>
-                {' '}
-                WB: {this.state.whiteBalance}{' '}
-              </Text>
-            </TouchableOpacity> */}
           </View>
           <View
             style={{
@@ -369,25 +197,9 @@ export default class CameraScreen extends React.Component {
               flexDirection: 'row',
               justifyContent: 'space-around',
             }}>
-            <TouchableOpacity
-              onPress={this.toggle('canDetectFaces')}
-              style={styles.flipButton}>
-              <Text style={styles.flipText}>
-                {!canDetectFaces ? 'Detect Faces' : 'Detecting Faces'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={this.toggle('canDetectText')}
-              style={styles.flipButton}>
+            <TouchableOpacity style={styles.flipButton}>
               <Text style={styles.flipText}>
                 {!canDetectText ? 'Detect Text' : 'Detecting Text'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={this.toggle('canDetectBarcode')}
-              style={styles.flipButton}>
-              <Text style={styles.flipText}>
-                {!canDetectBarcode ? 'Detect Barcode' : 'Detecting Barcode'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -395,72 +207,12 @@ export default class CameraScreen extends React.Component {
         <View style={{bottom: 0}}>
           <View
             style={{
-              height: 20,
-              backgroundColor: 'transparent',
-              flexDirection: 'row',
-              alignSelf: 'flex-end',
-            }}>
-            <Slider
-              style={{width: 150, marginTop: 15, alignSelf: 'flex-end'}}
-              onValueChange={this.setFocusDepth.bind(this)}
-              step={0.1}
-              disabled={this.state.autoFocus === 'on'}
-            />
-          </View>
-          <View
-            style={{
               height: 56,
               backgroundColor: 'transparent',
               flexDirection: 'row',
-              alignSelf: 'flex-end',
-            }}>
-            <TouchableOpacity
-              style={[
-                styles.flipButton,
-                {
-                  flex: 0.3,
-                  alignSelf: 'flex-end',
-                  backgroundColor: this.state.isRecording ? 'white' : 'darkred',
-                },
-              ]}
-              onPress={
-                this.state.isRecording ? () => {} : this.takeVideo.bind(this)
-              }>
-              {this.state.isRecording ? (
-                <Text style={styles.flipText}> ☕ </Text>
-              ) : (
-                <Text style={styles.flipText}> REC </Text>
-              )}
-            </TouchableOpacity>
-          </View>
-          {this.state.zoom !== 0 && (
-            <Text style={[styles.flipText, styles.zoomText]}>
-              Zoom: {this.state.zoom}
-            </Text>
-          )}
-          <View
-            style={{
-              height: 56,
-              backgroundColor: 'transparent',
-              flexDirection: 'row',
-              alignSelf: 'flex-end',
+              alignSelf: 'center',
               justifyContent: 'space-around',
             }}>
-            <TouchableOpacity
-              style={[styles.flipButton, {flex: 0.1, alignSelf: 'flex-end'}]}
-              onPress={this.zoomIn.bind(this)}>
-              <Text style={styles.flipText}> + </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.flipButton, {flex: 0.1, alignSelf: 'flex-end'}]}
-              onPress={this.zoomOut.bind(this)}>
-              <Text style={styles.flipText}> - </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.flipButton, {flex: 0.25, alignSelf: 'flex-end'}]}
-              onPress={this.toggleFocus.bind(this)}>
-              <Text style={styles.flipText}> AF : {this.state.autoFocus} </Text>
-            </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.flipButton,
@@ -472,10 +224,7 @@ export default class CameraScreen extends React.Component {
             </TouchableOpacity>
           </View>
         </View>
-        {!!canDetectFaces && this.renderFaces()}
-        {!!canDetectFaces && this.renderLandmarks()}
         {!!canDetectText && this.renderTextBlocks()}
-        {!!canDetectBarcode && this.renderBarcodes()}
       </RNCamera>
     );
   }

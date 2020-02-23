@@ -1,5 +1,4 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
 import Camera from './components/Camera.js';
 import Home from './components/Home';
 import TextReader from './components/TextReader';
@@ -79,12 +78,3 @@ const MajorStack = createStackNavigator({
 });
 
 const AppContainer = createAppContainer(MajorStack);
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
