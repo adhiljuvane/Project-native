@@ -1,6 +1,7 @@
 import React from 'react';
 import Camera from './components/Camera.js';
 import Home from './components/Home';
+import {StyleSheet} from 'react-native';
 import TextReader from './components/TextReader';
 import CameraScreen from './components/RNCamera';
 import {createSwitchNavigator, createAppContainer} from 'react-navigation';
@@ -13,8 +14,8 @@ export default class App extends React.Component {
   }
 
   render() {
-    // return <AppContainer style={styles.container} />;
-    return <CameraScreen />;
+    return <AppContainer style={styles.container} />;
+    // return <CameraScreen />;
   }
 }
 
@@ -75,6 +76,30 @@ const MajorStack = createStackNavigator({
       },
     },
   },
+  CameraScreen: {
+    screen: CameraScreen,
+    navigationOptions: {
+      headerTitle: 'Vis-Aid',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 24,
+        color: '#191716',
+      },
+      headerStyle: {
+        height: 70,
+        backgroundColor: '#e6af2e',
+      },
+    },
+  },
 });
 
 const AppContainer = createAppContainer(MajorStack);
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

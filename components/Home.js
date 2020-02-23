@@ -29,7 +29,7 @@ export default class Home extends React.Component {
       this.props.navigation.navigate('Camera');
     }
     if (data === 'open text reader') {
-      this.props.navigation.navigate('TextReader');
+      this.props.navigation.navigate('CameraScreen');
     }
   };
 

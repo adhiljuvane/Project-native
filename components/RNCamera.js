@@ -75,6 +75,10 @@ export default class CameraScreen extends React.Component {
     );
   }
 
+  componentWillUnmount() {
+    Tts.stop();
+  }
+
   toggleFacing() {
     this.setState({
       type: this.state.type === 'back' ? 'front' : 'back',
