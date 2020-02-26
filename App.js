@@ -1,7 +1,7 @@
 import React from 'react';
 import Camera from './components/Camera.js';
 import Home from './components/Home';
-import {StyleSheet} from 'react-native';
+import {StyleSheet, Image} from 'react-native';
 import TextReader from './components/TextReader';
 import CameraScreen from './components/RNCamera';
 import {createSwitchNavigator, createAppContainer} from 'react-navigation';
@@ -35,10 +35,17 @@ const MajorStack = createStackNavigator({
     screen: Home,
     navigationOptions: {
       headerTitle: 'Vis-Aid',
+      headerLeft: (
+        <Image
+          source={require('./assets/dog.png')}
+          style={{width: 50, height: 50 , marginHorizontal : 20}}
+        />
+      ),
       headerTitleStyle: {
         fontWeight: 'bold',
         fontSize: 24,
         color: '#191716',
+        marginLeft: 10,
       },
       headerStyle: {
         height: 70,
