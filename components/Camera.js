@@ -43,7 +43,7 @@ export default class Camera extends PureComponent {
         <RNCamera
           style={styles.preview}
           type={RNCamera.Constants.Type.back}
-          flashMode={RNCamera.Constants.FlashMode.on}
+          flashMode={RNCamera.Constants.FlashMode.off}
           androidCameraPermissionOptions={{
             title: 'Permission to use camera',
             message: 'We need your permission to use your camera',
@@ -141,7 +141,22 @@ export default class Camera extends PureComponent {
     const data = await camera.takePictureAsync(options);
     console.log(data.uri);
     this.setState({file: data.uri});
-    this.uploadImage();
+    const Clarifai = require('clarifai');
+    const app = new Clarifai.App({
+      apiKey: '986d8bfb0760472e9b6591d3896bf075',
+    });
+    app.models
+      .predict(Clarifai.GENERAL_MODEL, data.base64)
+      .then(response => {
+        //Alert.alert(response.outputs[0].data.concepts[0].name);
+        console.log('response', response.outputs[0].data.concepts);
+        Tts.speak(response.outputs[0].data.concepts[0].name);
+      })
+      .catch(err => {
+        console.log('err', err);
+        Alert.alert(err.message);
+      });
+    //this.uploadImage();
   };
 }
 
