@@ -47,6 +47,7 @@ export default class Home extends React.Component {
       <View style={styles.container}>
         <TouchableOpacity
           onPress={() => {
+            Tts.stop();
             Dialogflow.startListening(
               res => {
                 console.log(res.result.resolvedQuery);
