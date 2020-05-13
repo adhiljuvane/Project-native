@@ -184,7 +184,10 @@ export default class BarCode extends React.Component {
     }
   };
 
-  facesDetected = ({faces}) => this.setState({faces});
+  facesDetected = ({faces}) => {
+    this.setState({faces});
+    console.log('faces', faces);
+  };
 
   renderFace = ({bounds, faceID, rollAngle, yawAngle}) => (
     <View

@@ -37,49 +37,6 @@ export default class Camera extends PureComponent {
     };
   }
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <RNCamera
-          style={styles.preview}
-          type={RNCamera.Constants.Type.back}
-          flashMode={RNCamera.Constants.FlashMode.off}
-          androidCameraPermissionOptions={{
-            title: 'Permission to use camera',
-            message: 'We need your permission to use your camera',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cancel',
-          }}
-          androidRecordAudioPermissionOptions={{
-            title: 'Permission to use audio recording',
-            message: 'We need your permission to use your audio',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cancel',
-          }}>
-          {({camera, status, recordAudioPermissionStatus}) => {
-            if (status !== 'READY') {
-              return <PendingView />;
-            }
-            return (
-              <View
-                style={{
-                  flex: 0,
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                }}>
-                <TouchableOpacity
-                  onPress={() => this.takePicture(camera)}
-                  style={styles.capture}>
-                  <Text style={{fontSize: 14}}> SNAP </Text>
-                </TouchableOpacity>
-              </View>
-            );
-          }}
-        </RNCamera>
-      </View>
-    );
-  }
-
   uploadImage() {
     console.log('dssss');
     var self = this;
@@ -136,7 +93,34 @@ export default class Camera extends PureComponent {
       });
   }
 
+  //{id: 'people', version: 'b2ac212c6d4e41f8b77b5c3ac532c179'},
   takePicture = async function(camera) {
+    const options = {quality: 0.5, base64: true};
+    const data = await camera.takePictureAsync(options);
+    console.log(data.uri);
+    this.setState({file: data.uri});
+    const Clarifai = require('clarifai');
+    const app = new Clarifai.App({
+      apiKey: '986d8bfb0760472e9b6591d3896bf075',
+    });
+    app.models
+      .predict(
+        {id: 'people', version: 'b2ac212c6d4e41f8b77b5c3ac532c179'},
+        data.base64,
+      )
+      .then(response => {
+        Alert.alert(response.outputs[0].data.concepts[0].name);
+        console.log('response', response.outputs[0].data.concepts);
+        Tts.speak(response.outputs[0].data.concepts[0].name);
+      })
+      .catch(err => {
+        console.log('err', err);
+        Alert.alert(err.message);
+      });
+    //this.uploadImage();
+  };
+
+  takeGeneral = async function(camera) {
     const options = {quality: 0.5, base64: true};
     const data = await camera.takePictureAsync(options);
     console.log(data.uri);
@@ -148,7 +132,7 @@ export default class Camera extends PureComponent {
     app.models
       .predict(Clarifai.GENERAL_MODEL, data.base64)
       .then(response => {
-        //Alert.alert(response.outputs[0].data.concepts[0].name);
+        Alert.alert(response.outputs[0].data.concepts[0].name);
         console.log('response', response.outputs[0].data.concepts);
         Tts.speak(response.outputs[0].data.concepts[0].name);
       })
@@ -156,8 +140,55 @@ export default class Camera extends PureComponent {
         console.log('err', err);
         Alert.alert(err.message);
       });
-    //this.uploadImage();
   };
+
+  render() {
+    return (
+      <View style={styles.container}>
+        <RNCamera
+          style={styles.preview}
+          type={RNCamera.Constants.Type.back}
+          flashMode={RNCamera.Constants.FlashMode.off}
+          androidCameraPermissionOptions={{
+            title: 'Permission to use camera',
+            message: 'We need your permission to use your camera',
+            buttonPositive: 'Ok',
+            buttonNegative: 'Cancel',
+          }}
+          androidRecordAudioPermissionOptions={{
+            title: 'Permission to use audio recording',
+            message: 'We need your permission to use your audio',
+            buttonPositive: 'Ok',
+            buttonNegative: 'Cancel',
+          }}>
+          {({camera, status, recordAudioPermissionStatus}) => {
+            if (status !== 'READY') {
+              return <PendingView />;
+            }
+            return (
+              <View
+                style={{
+                  flex: 0,
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                }}>
+                <TouchableOpacity
+                  onPress={() => this.takePicture(camera)}
+                  style={styles.capture}>
+                  <Text style={{fontSize: 14}}> Custom </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => this.takeGeneral(camera)}
+                  style={styles.capture}>
+                  <Text style={{fontSize: 14}}> General </Text>
+                </TouchableOpacity>
+              </View>
+            );
+          }}
+        </RNCamera>
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
