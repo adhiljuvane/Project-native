@@ -4,8 +4,9 @@ import Home from './components/Home';
 import {StyleSheet, Image} from 'react-native';
 import TextReader from './components/TextReader';
 import CameraScreen from './components/RNCamera';
-import {createSwitchNavigator, createAppContainer} from 'react-navigation';
+import {createAppContainer} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
+import BarCode from './components/BarCode';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -38,7 +39,7 @@ const MajorStack = createStackNavigator({
       headerLeft: (
         <Image
           source={require('./assets/dog.png')}
-          style={{width: 50, height: 50 , marginHorizontal : 20}}
+          style={{width: 50, height: 50, marginHorizontal: 20}}
         />
       ),
       headerTitleStyle: {
@@ -69,7 +70,7 @@ const MajorStack = createStackNavigator({
     },
   },
   TextReader: {
-    screen: TextReader,
+    screen: BarCode, //TextReader
     navigationOptions: {
       headerTitle: 'Vis-Aid',
       headerTitleStyle: {
