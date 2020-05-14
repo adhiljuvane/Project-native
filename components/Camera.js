@@ -105,19 +105,32 @@ export default class Camera extends PureComponent {
     });
     app.models
       .predict(
-        {id: 'people', version: 'b2ac212c6d4e41f8b77b5c3ac532c179'},
+        {id: 'people', version: '60ddf0305cd1499d8dc031a5770372dc'},
         data.base64,
       )
       .then(response => {
         Alert.alert(response.outputs[0].data.concepts[0].name);
         console.log('response', response.outputs[0].data.concepts);
-        Tts.speak(response.outputs[0].data.concepts[0].name);
+        const result = this.getResults(response.outputs[0].data.concepts);
+        Tts.speak(result);
       })
       .catch(err => {
         console.log('err', err);
         Alert.alert(err.message);
       });
     //this.uploadImage();
+  };
+
+  getResults = function(concepts) {
+    var result = concepts[0].name;
+    var top = concepts[0].value;
+    concepts.forEach(concept => {
+      if (concept.value > top) {
+        top = concept.value;
+        result = concept.name;
+      }
+    });
+    return result;
   };
 
   takeGeneral = async function(camera) {
