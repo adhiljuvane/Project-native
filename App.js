@@ -39,18 +39,19 @@ const MajorStack = createStackNavigator({
       headerLeft: (
         <Image
           source={require('./assets/dog.png')}
-          style={{width: 50, height: 50, marginHorizontal: 20}}
+          style={{width: 50, height: 50, marginHorizontal: 20, color: '#fff'}}
         />
       ),
       headerTitleStyle: {
+        fontFamily: 'FiraCode',
         fontWeight: 'bold',
         fontSize: 24,
-        color: '#191716',
+        color: '#fff',
         marginLeft: 10,
       },
       headerStyle: {
         height: 70,
-        backgroundColor: '#e6af2e',
+        backgroundColor: '#09BC8A',
       },
     },
   },
@@ -61,11 +62,11 @@ const MajorStack = createStackNavigator({
       headerTitleStyle: {
         fontWeight: 'bold',
         fontSize: 24,
-        color: '#191716',
+        color: '#fff',
       },
       headerStyle: {
         height: 70,
-        backgroundColor: '#e6af2e',
+        backgroundColor: '#09BC8A',
       },
     },
   },
@@ -76,11 +77,11 @@ const MajorStack = createStackNavigator({
       headerTitleStyle: {
         fontWeight: 'bold',
         fontSize: 24,
-        color: '#191716',
+        color: '#fff',
       },
       headerStyle: {
         height: 70,
-        backgroundColor: '#e6af2e',
+        backgroundColor: '#09BC8A',
       },
     },
   },

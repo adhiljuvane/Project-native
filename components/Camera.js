@@ -4,6 +4,7 @@ import {storage} from '../config';
 import {StyleSheet, Alert, Text, TouchableOpacity, View} from 'react-native';
 import {RNCamera} from 'react-native-camera';
 import {YellowBox} from 'react-native';
+import Dialogflow from 'react-native-dialogflow';
 import Tts from 'react-native-tts';
 import _ from 'lodash';
 
@@ -147,7 +148,8 @@ export default class Camera extends PureComponent {
       .then(response => {
         Alert.alert(response.outputs[0].data.concepts[0].name);
         console.log('response', response.outputs[0].data.concepts);
-        Tts.speak(response.outputs[0].data.concepts[0].name);
+        const result = this.getResults(response.outputs[0].data.concepts);
+        Tts.speak(result);
       })
       .catch(err => {
         console.log('err', err);
