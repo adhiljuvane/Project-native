@@ -22,17 +22,6 @@ const flashModeOrder = {
   torch: 'off',
 };
 
-const wbOrder = {
-  auto: 'sunny',
-  sunny: 'cloudy',
-  cloudy: 'shadow',
-  shadow: 'fluorescent',
-  fluorescent: 'incandescent',
-  incandescent: 'auto',
-};
-
-const landmarkSize = 2;
-
 export default class BarCode extends React.Component {
   constructor(props) {
     super(props);
@@ -84,75 +73,23 @@ export default class BarCode extends React.Component {
     });
   }
 
-  toggleWB() {
-    this.setState({
-      whiteBalance: wbOrder[this.state.whiteBalance],
-    });
-  }
-
-  toggleFocus() {
-    this.setState({
-      autoFocus: this.state.autoFocus === 'on' ? 'off' : 'on',
-    });
-  }
-
-  zoomOut() {
-    this.setState({
-      zoom: this.state.zoom - 0.1 < 0 ? 0 : this.state.zoom - 0.1,
-    });
-  }
-
-  zoomIn() {
-    this.setState({
-      zoom: this.state.zoom + 0.1 > 1 ? 1 : this.state.zoom + 0.1,
-    });
-  }
-
-  setFocusDepth(depth) {
-    this.setState({
-      depth,
-    });
-  }
-
-  touchToFocus(event) {
-    const {pageX, pageY} = event.nativeEvent;
-    const screenWidth = Dimensions.get('window').width;
-    const screenHeight = Dimensions.get('window').height;
-    const isPortrait = screenHeight > screenWidth;
-    let x = pageX / screenWidth;
-    let y = pageY / screenHeight;
-    // Coordinate transform for portrait. See autoFocusPointOfInterest in docs for more info
-    if (isPortrait) {
-      x = pageY / screenHeight;
-      y = -(pageX / screenWidth) + 1;
-    }
-    this.setState({
-      autoFocusPoint: {
-        normalized: {x, y},
-        drawRectPosition: {x: pageX, y: pageY},
-      },
-    });
-  }
-
-  gotSpeech = data => {
-    if (data === 'open camera') {
-      this.props.navigation.navigate('Camera');
-    }
-    if (data === 'open text reader') {
-      this.props.navigation.navigate('TextReader');
-    }
-  };
-
   componentDidMount() {
-    Dialogflow.startListening(
-      res => {
-        console.log(res.result.resolvedQuery);
-        this.gotSpeech(res.result.resolvedQuery);
-      },
-      error => {
-        console.log(error);
-      },
-    );
+    if (this.props.navigation.getParam('mode') === 'text') {
+      console.log('inside diUpdate mode text');
+      this.setState({canDetectText: true}, () => {
+        console.log('state updated text', this.state.canDetectText);
+      });
+    } else if (this.props.navigation.getParam('mode') === 'barcode') {
+      console.log('inside diUpdate mode barcode');
+      var that = this;
+      this.setState({canDetectBarcode: true}, () => {
+        console.log('state updated barcode', that.state.canDetectBarcode);
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    Tts.stop();
   }
 
   takePicture = async function() {
@@ -169,91 +106,6 @@ export default class BarCode extends React.Component {
       }
     }
   };
-
-  takeVideo = async function() {
-    if (this.camera) {
-      try {
-        const promise = this.camera.recordAsync(this.state.recordOptions);
-        if (promise) {
-          this.setState({isRecording: true});
-          const data = await promise;
-          this.setState({isRecording: false});
-          console.warn('takeVideo', data);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  };
-
-  facesDetected = ({faces}) => {
-    this.setState({faces});
-    console.log('faces', faces);
-  };
-
-  renderFace = ({bounds, faceID, rollAngle, yawAngle}) => (
-    <View
-      key={faceID}
-      transform={[
-        {perspective: 600},
-        {rotateZ: `${rollAngle.toFixed(0)}deg`},
-        {rotateY: `${yawAngle.toFixed(0)}deg`},
-      ]}
-      style={[
-        styles.face,
-        {
-          ...bounds.size,
-          left: bounds.origin.x,
-          top: bounds.origin.y,
-        },
-      ]}>
-      <Text style={styles.faceText}>ID: {faceID}</Text>
-      <Text style={styles.faceText}>rollAngle: {rollAngle.toFixed(0)}</Text>
-      <Text style={styles.faceText}>yawAngle: {yawAngle.toFixed(0)}</Text>
-    </View>
-  );
-
-  renderLandmarksOfFace(face) {
-    const renderLandmark = position =>
-      position && (
-        <View
-          style={[
-            styles.landmark,
-            {
-              left: position.x - landmarkSize / 2,
-              top: position.y - landmarkSize / 2,
-            },
-          ]}
-        />
-      );
-    return (
-      <View key={`landmarks-${face.faceID}`}>
-        {renderLandmark(face.leftEyePosition)}
-        {renderLandmark(face.rightEyePosition)}
-        {renderLandmark(face.leftEarPosition)}
-        {renderLandmark(face.rightEarPosition)}
-        {renderLandmark(face.leftCheekPosition)}
-        {renderLandmark(face.rightCheekPosition)}
-        {renderLandmark(face.leftMouthPosition)}
-        {renderLandmark(face.mouthPosition)}
-        {renderLandmark(face.rightMouthPosition)}
-        {renderLandmark(face.noseBasePosition)}
-        {renderLandmark(face.bottomMouthPosition)}
-      </View>
-    );
-  }
-
-  renderFaces = () => (
-    <View style={styles.facesContainer} pointerEvents="none">
-      {this.state.faces.map(this.renderFace)}
-    </View>
-  );
-
-  renderLandmarks = () => (
-    <View style={styles.facesContainer} pointerEvents="none">
-      {this.state.faces.map(this.renderLandmarksOfFace)}
-    </View>
-  );
 
   toggle = value => () => {
     this.setState(prevState => ({[value]: !prevState[value]}));
@@ -298,7 +150,7 @@ export default class BarCode extends React.Component {
     if (barcodes.barcodes[0].data) {
       console.log('req', barcodes.barcodes[0].data);
       const products = await fetch(
-        `https://api.barcodelookup.com/v2/products?barcode=${barcodes.barcodes[0].data}&formatted=y&key=8ddtkijd18zy6ofsmitehlky6i78mc`,
+        `https://api.barcodelookup.com/v2/products?barcode=${barcodes.barcodes[0].data}&formatted=y&key=dn3reqrmt6c8ha9dc2qnfw06xt6t2a`,
         {method: 'GET'},
       )
         .then(response => response.json())
@@ -339,10 +191,6 @@ export default class BarCode extends React.Component {
 
   renderCamera() {
     const {canDetectFaces, canDetectText, canDetectBarcode} = this.state;
-    const drawFocusRingPosition = {
-      top: this.state.autoFocusPoint.drawRectPosition.y - 32,
-      left: this.state.autoFocusPoint.drawRectPosition.x - 32,
-    };
     return (
       <RNCamera
         ref={ref => {
@@ -376,13 +224,6 @@ export default class BarCode extends React.Component {
           canDetectBarcode ? this.barcodeRecognized : null
         }
         onTextRecognized={canDetectText ? this.textRecognized : null}>
-        <View style={StyleSheet.absoluteFill}>
-          <View style={[styles.autoFocusBox, drawFocusRingPosition]} />
-
-          <TouchableWithoutFeedback onPress={this.touchToFocus.bind(this)}>
-            <View style={{flex: 1}} />
-          </TouchableWithoutFeedback>
-        </View>
         <View
           style={{
             flex: 0.6,
@@ -416,9 +257,7 @@ export default class BarCode extends React.Component {
               flexDirection: 'row',
               justifyContent: 'space-around',
             }}>
-            <TouchableOpacity
-              onPress={this.toggle('canDetectText')}
-              style={styles.flipButton}>
+            <TouchableOpacity style={styles.flipButton}>
               <Text style={styles.flipText}>
                 {!canDetectText ? 'Detect Text' : 'Detecting Text'}
               </Text>
@@ -442,8 +281,7 @@ export default class BarCode extends React.Component {
               alignSelf: 'center',
               justifyContent: 'space-around',
             }}>
-            {console.log('mode', this.props.navigation.getParam('mode'))}
-            {this.props.navigation.getParam('mode') === 'text' ? (
+            {canDetectText ? (
               <TouchableOpacity
                 style={[
                   styles.flipButton,
@@ -465,9 +303,6 @@ export default class BarCode extends React.Component {
             )}
           </View>
         </View>
-        {!!canDetectText && this.renderTextBlocks()}
-        {!!canDetectFaces && this.renderFaces()}
-        {!!canDetectFaces && this.renderLandmarks()}
         {!!canDetectText && this.renderTextBlocks()}
         {!!canDetectBarcode && this.renderBarcodes()}
       </RNCamera>
@@ -540,12 +375,6 @@ const styles = StyleSheet.create({
     borderColor: '#FFD700',
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  landmark: {
-    width: landmarkSize,
-    height: landmarkSize,
-    position: 'absolute',
-    backgroundColor: 'red',
   },
   faceText: {
     color: '#FFD700',

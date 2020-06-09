@@ -51,14 +51,18 @@ export default class Home extends React.Component {
   }
 
   gotSpeech = data => {
-    if (data === 'open camera') {
-      this.props.navigation.navigate('Camera');
-    }
-    if (data === 'open text reader') {
-      this.props.navigation.navigate('TextReader'); //CameraScreen
-    }
-    if (data === 'open training') {
-      this.props.navigation.navigate('Training');
+    if (data === 'open object detection') {
+      console.log('through object');
+      this.props.navigation.navigate('Camera', {mode: 'general'});
+    } else if (data === 'open facial recognition') {
+      console.log('through face');
+      this.props.navigation.navigate('Camera', {mode: 'custom'}); //CameraScreen
+    } else if (data === 'open Barcode Scanner') {
+      console.log('through barcode');
+      this.props.navigation.navigate('TextReader', {mode: 'barcode'});
+    } else if (data === 'open text reader') {
+      console.log('through ext reader');
+      this.props.navigation.navigate('TextReader', {mode: 'text'});
     }
   };
 
@@ -115,25 +119,32 @@ export default class Home extends React.Component {
         {this.state.switchValue ? (
           <View style={styles.card}>
             <Text style={styles.content}>
-              Welcome to Vis-Aid , An app to help visually challanged people and
-              kids to understand the object infront of them and also to read any
-              text using our text reader.
+              Welcome to Visual Aid, your personal assistant. We help you
+              identify objects, read books and scan for product details!
             </Text>
             <Text style={styles.title}>How to use :</Text>
             <Text style={styles.content}>
-              To open object recognition, Press the mic and speak OPEN CAMERA.
+              To open object detection, Press the mic and speak OPEN OBJECT
+              DETECTION.
             </Text>
             <Text style={styles.content}>
-              To open text recognition, Press the mic and speak OPEN TEXT
+              To open facial recognition , Press the mic and speak OPEN FACIAL
+              RECOGNITION.
+            </Text>
+            <Text style={styles.content}>
+              To open Barcode scanner , Press the mic and speak OPEN BARCODE
+              SCANNER.
+            </Text>
+            <Text style={styles.content}>
+              To open text Recognition , Press the mic and speak OPEN TEXT
               READER.
             </Text>
           </View>
         ) : (
           <View style={styles.card}>
             <Text style={styles.content}>
-              Welcome to Vis-Aid , An app to help visually challanged people and
-              kids to understand the object infront of them and also to read any
-              text using our text reader.
+              Welcome to Visual Aid, your personal assistant. We help you
+              identify objects, read books and scan for product details!.
             </Text>
             <Text style={styles.title}>What we Provide</Text>
             <View
@@ -182,7 +193,7 @@ const styles = StyleSheet.create({
   },
   switchContainer: {
     flex: 1,
-    height: '40%',
+    height: '30%',
     width: '80%',
     justifyContent: 'space-evenly',
     alignItems: 'center',
@@ -190,7 +201,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '80%',
-    height: '60%',
+    height: '70%',
     backgroundColor: '#1d3557',
     borderRadius: 30,
     fontFamily: 'Zocial',

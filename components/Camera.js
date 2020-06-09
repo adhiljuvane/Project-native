@@ -196,7 +196,7 @@ export default class Camera extends PureComponent {
                   <TouchableOpacity
                     onPress={() => this.takePicture(camera)}
                     style={styles.capture}>
-                    <Text style={{fontSize: 14}}> Detect </Text>
+                    <Text style={{fontSize: 14}}> Identify </Text>
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity
