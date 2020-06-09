@@ -35,7 +35,12 @@ export default class Camera extends PureComponent {
       identifedAs: '',
       loading: false,
       file: '',
+      mode: this.props.navigation.getParam('mode'),
     };
+  }
+
+  componentDidMount() {
+    console.log('mode', this.props.navigation.getParam('mode'));
   }
 
   uploadImage() {
@@ -187,16 +192,19 @@ export default class Camera extends PureComponent {
                   flexDirection: 'row',
                   justifyContent: 'center',
                 }}>
-                <TouchableOpacity
-                  onPress={() => this.takePicture(camera)}
-                  style={styles.capture}>
-                  <Text style={{fontSize: 14}}> Custom </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => this.takeGeneral(camera)}
-                  style={styles.capture}>
-                  <Text style={{fontSize: 14}}> General </Text>
-                </TouchableOpacity>
+                {this.state.mode === 'custom' ? (
+                  <TouchableOpacity
+                    onPress={() => this.takePicture(camera)}
+                    style={styles.capture}>
+                    <Text style={{fontSize: 14}}> Detect </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    onPress={() => this.takeGeneral(camera)}
+                    style={styles.capture}>
+                    <Text style={{fontSize: 14}}> Detect </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             );
           }}

@@ -34,34 +34,43 @@ const wbOrder = {
 const landmarkSize = 2;
 
 export default class BarCode extends React.Component {
-  state = {
-    flash: 'off',
-    zoom: 0,
-    autoFocus: 'on',
-    autoFocusPoint: {
-      normalized: {x: 0.5, y: 0.5}, // normalized values required for autoFocusPointOfInterest
-      drawRectPosition: {
-        x: Dimensions.get('window').width * 0.5 - 32,
-        y: Dimensions.get('window').height * 0.5 - 32,
+  constructor(props) {
+    super(props);
+    Dialogflow.setConfiguration(
+      'f39404ed1be04ba5add1b40b7c6e0ae8',
+      Dialogflow.LANG_ENGLISH_US,
+    );
+
+    this.state = {
+      flash: 'off',
+      zoom: 0,
+      autoFocus: 'on',
+      autoFocusPoint: {
+        normalized: {x: 0.5, y: 0.5}, // normalized values required for autoFocusPointOfInterest
+        drawRectPosition: {
+          x: Dimensions.get('window').width * 0.5 - 32,
+          y: Dimensions.get('window').height * 0.5 - 32,
+        },
       },
-    },
-    depth: 0,
-    type: 'back',
-    // whiteBalance: 'auto',
-    ratio: '16:9',
-    recordOptions: {
-      mute: false,
-      maxDuration: 5,
-      quality: RNCamera.Constants.VideoQuality['288p'],
-    },
-    isRecording: false,
-    canDetectFaces: false,
-    canDetectText: false,
-    canDetectBarcode: false,
-    faces: [],
-    textBlocks: [],
-    barcodes: [],
-  };
+      depth: 0,
+      type: 'back',
+      // whiteBalance: 'auto',
+      ratio: '16:9',
+      recordOptions: {
+        mute: false,
+        maxDuration: 5,
+        quality: RNCamera.Constants.VideoQuality['288p'],
+      },
+      isRecording: false,
+      canDetectFaces: false,
+      canDetectText: false,
+      canDetectBarcode: false,
+      faces: [],
+      textBlocks: [],
+      barcodes: [],
+      mode: this.props.navigation.getParam('mode'),
+    };
+  }
 
   toggleFacing() {
     this.setState({
@@ -134,13 +143,6 @@ export default class BarCode extends React.Component {
     }
   };
 
-  constructor() {
-    super();
-    Dialogflow.setConfiguration(
-      'f39404ed1be04ba5add1b40b7c6e0ae8',
-      Dialogflow.LANG_ENGLISH_US,
-    );
-  }
   componentDidMount() {
     Dialogflow.startListening(
       res => {
@@ -253,8 +255,10 @@ export default class BarCode extends React.Component {
     </View>
   );
 
-  toggle = value => () =>
+  toggle = value => () => {
     this.setState(prevState => ({[value]: !prevState[value]}));
+    Tts.stop();
+  };
 
   renderTextBlocks = () => (
     <View style={styles.facesContainer} pointerEvents="none">
@@ -404,14 +408,6 @@ export default class BarCode extends React.Component {
               onPress={this.toggleFlash.bind(this)}>
               <Image source={require('../assets/flash.png')} />
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.flipButton}
-              onPress={this.toggleWB.bind(this)}>
-              <Text style={styles.flipText}>
-                {' '}
-                WB: {this.state.whiteBalance}{' '}
-              </Text>
-            </TouchableOpacity>
           </View>
           <View
             style={{
@@ -420,13 +416,6 @@ export default class BarCode extends React.Component {
               flexDirection: 'row',
               justifyContent: 'space-around',
             }}>
-            <TouchableOpacity
-              onPress={this.toggle('canDetectFaces')}
-              style={styles.flipButton}>
-              <Text style={styles.flipText}>
-                {!canDetectFaces ? 'Detect Faces' : 'Detecting Faces'}
-              </Text>
-            </TouchableOpacity>
             <TouchableOpacity
               onPress={this.toggle('canDetectText')}
               style={styles.flipButton}>
@@ -444,86 +433,36 @@ export default class BarCode extends React.Component {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={{bottom: 0}}>
-          <View
-            style={{
-              height: 20,
-              backgroundColor: 'transparent',
-              flexDirection: 'row',
-              alignSelf: 'flex-end',
-            }}>
-            <Slider
-              style={{width: 150, marginTop: 15, alignSelf: 'flex-end'}}
-              onValueChange={this.setFocusDepth.bind(this)}
-              step={0.1}
-              disabled={this.state.autoFocus === 'on'}
-            />
-          </View>
+        <View style={{bottom: 10}}>
           <View
             style={{
               height: 56,
               backgroundColor: 'transparent',
               flexDirection: 'row',
-              alignSelf: 'flex-end',
-            }}>
-            <TouchableOpacity
-              style={[
-                styles.flipButton,
-                {
-                  flex: 0.3,
-                  alignSelf: 'flex-end',
-                  backgroundColor: this.state.isRecording ? 'white' : 'darkred',
-                },
-              ]}
-              onPress={
-                this.state.isRecording ? () => {} : this.takeVideo.bind(this)
-              }>
-              {this.state.isRecording ? (
-                <Text style={styles.flipText}> ☕ </Text>
-              ) : (
-                <Text style={styles.flipText}> REC </Text>
-              )}
-            </TouchableOpacity>
-          </View>
-          {this.state.zoom !== 0 && (
-            <Text style={[styles.flipText, styles.zoomText]}>
-              Zoom: {this.state.zoom}
-            </Text>
-          )}
-          <View
-            style={{
-              height: 56,
-              backgroundColor: 'transparent',
-              flexDirection: 'row',
-              alignSelf: 'flex-end',
+              alignSelf: 'center',
               justifyContent: 'space-around',
             }}>
-            <TouchableOpacity
-              style={[styles.flipButton, {flex: 0.1, alignSelf: 'flex-end'}]}
-              onPress={this.zoomIn.bind(this)}>
-              <Text style={styles.flipText}> + </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.flipButton, {flex: 0.1, alignSelf: 'flex-end'}]}
-              onPress={this.zoomOut.bind(this)}>
-              <Text style={styles.flipText}> - </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.flipButton, {flex: 0.25, alignSelf: 'flex-end'}]}
-              onPress={this.toggleFocus.bind(this)}>
-              <Text style={styles.flipText}> AF : {this.state.autoFocus} </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.flipButton,
-                styles.picButton,
-                {flex: 0.3, alignSelf: 'flex-end'},
-              ]}
-              onPress={this.takePicture.bind(this)}>
-              <Text style={styles.flipText}> SNAP </Text>
-            </TouchableOpacity>
+            {console.log('mode', this.props.navigation.getParam('mode'))}
+            {this.props.navigation.getParam('mode') === 'text' ? (
+              <TouchableOpacity
+                style={[
+                  styles.flipButton,
+                  styles.picButton,
+                  {flex: 0.5, alignSelf: 'center'},
+                ]}
+                onPress={this.takePicture.bind(this)}>
+                <Text style={styles.picText}> SNAP </Text>
+              </TouchableOpacity>
+            ) : (
+              <View
+                style={[
+                  styles.flipButton,
+                  styles.picButton,
+                  {flex: 0.5, alignSelf: 'center', backgroundColor: 'grey'},
+                ]}>
+                <Text style={styles.picText}> Point To Barcode </Text>
+              </View>
+            )}
           </View>
         </View>
         {!!canDetectText && this.renderTextBlocks()}
@@ -571,6 +510,10 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 15,
   },
+  picText: {
+    color: 'white',
+    fontSize: 15,
+  },
   zoomText: {
     position: 'absolute',
     bottom: 70,
@@ -578,7 +521,9 @@ const styles = StyleSheet.create({
     left: 2,
   },
   picButton: {
-    backgroundColor: 'darkseagreen',
+    backgroundColor: '#457b9d',
+    color: '#fff',
+    fontSize: 15,
   },
   facesContainer: {
     position: 'absolute',

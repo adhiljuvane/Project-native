@@ -2,6 +2,7 @@ import React from 'react';
 import Camera from './components/Camera.js';
 import Home from './components/Home';
 import {StyleSheet, Image} from 'react-native';
+import Training from './components/Training';
 import TextReader from './components/TextReader';
 import CameraScreen from './components/RNCamera';
 import {createAppContainer} from 'react-navigation';
@@ -51,7 +52,7 @@ const MajorStack = createStackNavigator({
       },
       headerStyle: {
         height: 70,
-        backgroundColor: '#09BC8A',
+        backgroundColor: '#457b9d',
       },
     },
   },
@@ -66,7 +67,7 @@ const MajorStack = createStackNavigator({
       },
       headerStyle: {
         height: 70,
-        backgroundColor: '#09BC8A',
+        backgroundColor: '#457b9d',
       },
     },
   },
@@ -81,7 +82,7 @@ const MajorStack = createStackNavigator({
       },
       headerStyle: {
         height: 70,
-        backgroundColor: '#09BC8A',
+        backgroundColor: '#457b9d',
       },
     },
   },
@@ -96,7 +97,22 @@ const MajorStack = createStackNavigator({
       },
       headerStyle: {
         height: 70,
-        backgroundColor: '#e6af2e',
+        backgroundColor: '#457b9d',
+      },
+    },
+  },
+  Training: {
+    screen: Training,
+    navigationOptions: {
+      headerTitle: 'Vis-Aid',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 24,
+        color: '#191716',
+      },
+      headerStyle: {
+        height: 70,
+        backgroundColor: '#457b9d',
       },
     },
   },
