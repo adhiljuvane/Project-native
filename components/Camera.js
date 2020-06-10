@@ -1,7 +1,14 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {PureComponent} from 'react';
 import {storage} from '../config';
-import {StyleSheet, Alert, Text, TouchableOpacity, View} from 'react-native';
+import {
+  StyleSheet,
+  Alert,
+  Text,
+  TouchableOpacity,
+  View,
+  Image,
+} from 'react-native';
 import {RNCamera} from 'react-native-camera';
 import {YellowBox} from 'react-native';
 import Dialogflow from 'react-native-dialogflow';
@@ -36,11 +43,18 @@ export default class Camera extends PureComponent {
       loading: false,
       file: '',
       mode: this.props.navigation.getParam('mode'),
+      type: 'back',
     };
   }
 
   componentDidMount() {
     console.log('mode', this.props.navigation.getParam('mode'));
+  }
+
+  toggleFacing() {
+    this.setState({
+      type: this.state.type === 'back' ? 'front' : 'back',
+    });
   }
 
   uploadImage() {
@@ -111,11 +125,12 @@ export default class Camera extends PureComponent {
     });
     app.models
       .predict(
-        {id: 'people', version: '60ddf0305cd1499d8dc031a5770372dc'},
+        {id: 'people', version: '10bae5f65f4e47d5a00ba28e4f504c5a'},
         data.base64,
       )
       .then(response => {
         Alert.alert(response.outputs[0].data.concepts[0].name);
+        console.log('res', response);
         console.log('response', response.outputs[0].data.concepts);
         const result = this.getResults(response.outputs[0].data.concepts);
         Tts.speak(result);
@@ -151,10 +166,15 @@ export default class Camera extends PureComponent {
     app.models
       .predict(Clarifai.GENERAL_MODEL, data.base64)
       .then(response => {
-        Alert.alert(response.outputs[0].data.concepts[0].name);
         console.log('response', response.outputs[0].data.concepts);
-        const result = this.getResults(response.outputs[0].data.concepts);
-        Tts.speak(result);
+        Tts.speak('This image may contain');
+        response.outputs[0].data.concepts.forEach(concept => {
+          if (concept.value > 0.95) {
+            Tts.speak(concept.name);
+          }
+        });
+        // const result = this.getResults(response.outputs[0].data.concepts);
+        // Tts.speak(result);
       })
       .catch(err => {
         console.log('err', err);
@@ -167,7 +187,7 @@ export default class Camera extends PureComponent {
       <View style={styles.container}>
         <RNCamera
           style={styles.preview}
-          type={RNCamera.Constants.Type.back}
+          type={this.state.type}
           flashMode={RNCamera.Constants.FlashMode.off}
           androidCameraPermissionOptions={{
             title: 'Permission to use camera',
@@ -191,6 +211,7 @@ export default class Camera extends PureComponent {
                   flex: 0,
                   flexDirection: 'row',
                   justifyContent: 'center',
+                  alignItems: 'center',
                 }}>
                 {this.state.mode === 'custom' ? (
                   <TouchableOpacity
@@ -205,6 +226,11 @@ export default class Camera extends PureComponent {
                     <Text style={{fontSize: 14}}> Detect </Text>
                   </TouchableOpacity>
                 )}
+                <TouchableOpacity
+                  style={styles.flipButton}
+                  onPress={this.toggleFacing.bind(this)}>
+                  <Image source={require('../assets/rotate.png')} />
+                </TouchableOpacity>
               </View>
             );
           }}
@@ -233,5 +259,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignSelf: 'center',
     margin: 20,
+  },
+  flipButton: {
+    flex: 0.4,
+    height: 50,
+    marginBottom: 10,
+    marginTop: 10,
+    borderRadius: 8,
+    borderColor: 'white',
+    borderWidth: 1,
+    padding: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

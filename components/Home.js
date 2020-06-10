@@ -38,14 +38,20 @@ export default class Home extends React.Component {
     Tts.stop();
     if (this.state.switchValue) {
       Tts.speak(
-        'Welcome to Vis-Aid , An app to help visually challanged people and kids to understand the object infront of them and also to read any text using our text reader.',
+        'Welcome to Visual Aid, your personal assistant. We help you identify objects, read books and scan for product details!',
       );
       Tts.speak('How to use');
       Tts.speak(
-        'To open object recognition, Press the mic and speak OPEN CAMERA.',
+        'To open object detection, Press the mic and speak OPEN OBJECT DETECTION.',
       );
       Tts.speak(
-        'To open text recognition, Press the mic and speak OPEN TEXT READER.',
+        'To open facial recognition , Press the mic and speak OPEN FACIAL RECOGNITION.',
+      );
+      Tts.speak(
+        'To open Barcode scanner , Press the mic and speak OPEN BARCODE SCANNER.',
+      );
+      Tts.speak(
+        'To open text Recognition , Press the mic and speak OPEN TEXT READER.',
       );
     }
   }
